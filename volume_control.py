@@ -7,8 +7,8 @@ import subprocess
 mp_drawing = mp.solutions.drawing_utils
 mp_hands = mp.solutions.hands
 
-VOLUME_LEVELS = [0.0, 0.3, 0.6, 1.0]
-AREA_THRESHOLDS = [0.05, 0.15, 0.25]
+VOLUME_LEVELS = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+AREA_THRESHOLDS = [0.03, 0.05, 0.07, 0.10, 0.13, 0.15, 0.17, 0.20, 0.23, 0.25]
 
 def change_vol():
     cap = cv2.VideoCapture(0)
