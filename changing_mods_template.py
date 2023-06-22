@@ -67,13 +67,13 @@ def detect_finger():
                             return
                         elif finger == mp_hands.HandLandmark.MIDDLE_FINGER_TIP:
                             active_box_index = 2
-                            print("Middle finger detected...")
+                            print("Middle finger detected [Not set]")
                         elif finger == mp_hands.HandLandmark.RING_FINGER_TIP:
                             active_box_index = 1
-                            print("Ring finger detected...")
+                            print("Ring finger detected [Not set]")
                         elif finger == mp_hands.HandLandmark.PINKY_TIP:
                             active_box_index = 0
-                            print("Pinky finger detected...")
+                            print("Pinky finger detected [Not set]")
 
         for i, (x, y) in enumerate(box_positions):
             color = box_colors[i]
