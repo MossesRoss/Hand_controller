@@ -6,6 +6,8 @@ import subprocess
 print("""To navigate back to the template, place your index finger in the left corner of the screen.
 Do the opposite if you don't want to get out of this.""")
 
+# add conformation message
+
 def change_brightness():
     mp_hands = mp.solutions.hands
     hands = mp_hands.Hands(static_image_mode=False, max_num_hands=1, min_detection_confidence=0.5)
