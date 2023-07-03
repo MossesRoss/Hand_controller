@@ -75,4 +75,5 @@ def change_brightness():
     cap.release()
     cv2.destroyAllWindows()
 
-change_brightness()
+if __name__ == "__main__":
+    change_brightness()
