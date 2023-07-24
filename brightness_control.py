@@ -3,10 +3,8 @@ import mediapipe as mp
 import screen_brightness_control as sbc
 import subprocess
 
-print("""To navigate back to the template, place your index finger in the left corner of the screen.
-Do the opposite if you don't want to get out of this.""")
-
-# add conformation message
+print ("Move your finger down to increase the volume and do the opposite to increase the volume")
+print("To close this and go to change modes template, move your finger to the left.")
 
 def change_brightness():
     mp_hands = mp.solutions.hands
@@ -49,23 +47,8 @@ def change_brightness():
                     cv2.destroyAllWindows()
                     return
 
-                if index_finger_y < center_y:
-                    sbc.set_brightness(100)
-                    cv2.rectangle(image, (0, 0), (screen_width, center_y), (0, 255, 0), -1)
-                elif index_finger_y < r_center_y:
-                    sbc.set_brightness(70)
-                    cv2.rectangle(image, (0, center_y), (screen_width, r_center_y), (255, 255, 0), -1)
-                elif index_finger_y < x_center_y:
-                    sbc.set_brightness(50)
-                    cv2.rectangle(image, (0, r_center_y), (screen_width, x_center_y), (255, 0, 0), -1)
-                elif index_finger_y < y_center_y:
-                    sbc.set_brightness(20)
-                    cv2.rectangle(image, (0, x_center_y), (screen_width, y_center_y), (255, 0, 255), -1)
-                elif index_finger_y < f_center_y:
-                    sbc.set_brightness(0)
-                    cv2.rectangle(image, (0, y_center_y), (screen_width, f_center_y), (0, 0, 255), -1)
-                else:
-                    sbc.set_brightness(0)
+                brightness = (index_finger_y / screen_height) * 100
+                sbc.set_brightness(int(brightness))
 
         cv2.imshow('Wave your hand here', image)
 
