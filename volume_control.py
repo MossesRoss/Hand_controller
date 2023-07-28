@@ -4,84 +4,65 @@ import ctypes
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 import subprocess
 
-mp_drawing = mp.solutions.drawing_utils
-mp_hands = mp.solutions.hands
+def change_volume():
+    mp_hands = mp.solutions.hands
+    hands = mp_hands.Hands(static_image_mode=False, max_num_hands=1, min_detection_confidence=0.5)
+    mp_drawing = mp.solutions.drawing_utils
 
-VOLUME_LEVELS = [0.0, 0.3, 0.6, 1.0]
-AREA_THRESHOLDS = [0.05, 0.15, 0.25]
-
-def change_vol():
     cap = cv2.VideoCapture(0)
+    screen_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    screen_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
+    # Getting Volume interface
     devices = AudioUtilities.GetSpeakers()
     interface = devices.Activate(IAudioEndpointVolume._iid_, 0x17, None)
     volume = ctypes.cast(interface, ctypes.POINTER(IAudioEndpointVolume))
     current_volume = volume.GetMasterVolumeLevelScalar()
 
-    with mp_hands.Hands(
-        static_image_mode=False,
-        max_num_hands=3,
-        min_detection_confidence=0.5) as hands:
+    while True:
+        success, image = cap.read()
+        if not success:
+            break
 
-        while cap.isOpened():
-            ret, frame = cap.read()
-            frame = cv2.flip(frame, 1)
+        image = cv2.flip(image, 1)
+        image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        results = hands.process(image_rgb)
 
-            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        if results.multi_hand_landmarks:
+            for hand_landmarks in results.multi_hand_landmarks:
+                mp_drawing.draw_landmarks(image, hand_landmarks, mp_hands.HAND_CONNECTIONS)
 
-            results = hands.process(frame_rgb)
+                index_finger_landmark = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP]
+                index_finger_x = int(index_finger_landmark.x * screen_width)
+                index_finger_y = int(index_finger_landmark.y * screen_height)
 
-            if results.multi_hand_landmarks:
-                for hand_landmarks in results.multi_hand_landmarks:
+                if index_finger_x < 100:
+                    subprocess.Popen(['python', 'changing_mods_template.py'])
+                    cap.release()
+                    cv2.destroyAllWindows()
+                    return
 
-                    mp_drawing.draw_landmarks(
-                        frame,
-                        hand_landmarks,
-                        mp_hands.HAND_CONNECTIONS,
-                        mp_drawing.DrawingSpec(color=(0, 255, 0), thickness=2),
-                        mp_drawing.DrawingSpec(color=(255, 0, 0), thickness=2))
+                # Calculate the new volume
+                new_volume = 1.0 - (index_finger_y / screen_height)
+                if new_volume < 0.0:
+                    new_volume = 0.0
+                elif new_volume > 1.0:
+                    new_volume = 1.0
 
-                    thumb_landmark = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP]
-                    index_finger_landmark = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP]
+                # Set the volume if it's changed
+                if new_volume != current_volume:
+                    volume.SetMasterVolumeLevelScalar(new_volume, None)
+                    current_volume = new_volume
 
-                    thumb_x, thumb_y = thumb_landmark.x, thumb_landmark.y
-                    index_finger_x, index_finger_y = index_finger_landmark.x, index_finger_landmark.y
+        cv2.imshow('User Interface', image)
 
-                    distance = ((thumb_x - index_finger_x) ** 2 + (thumb_y - index_finger_y) ** 2) ** 0.5
-
-                    hand_area = (hand_landmarks.landmark[mp_hands.HandLandmark.WRIST].x - hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP].x) * (hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].y - hand_landmarks.landmark[mp_hands.HandLandmark.WRIST].y)
-
-                    if distance < AREA_THRESHOLDS[0]:
-                        new_volume = VOLUME_LEVELS[0]
-                    elif distance < AREA_THRESHOLDS[1]:
-                        new_volume = VOLUME_LEVELS[1]
-                    elif distance < AREA_THRESHOLDS[2]:
-                        new_volume = VOLUME_LEVELS[2]
-                    else:
-                        new_volume = VOLUME_LEVELS[3]
-
-                    if new_volume != current_volume:
-                        volume.SetMasterVolumeLevelScalar(new_volume, None)
-                        current_volume = new_volume
-
-                    volume_bar_height = int((1.0 - current_volume) * frame.shape[0])
-                    cv2.rectangle(frame, (0, 0), (20, frame.shape[0]), (0, 0, 255), -1)
-                    cv2.rectangle(frame, (0, volume_bar_height), (20, frame.shape[0]), (0, 255, 0), -1)
-
-                    
-                    if index_finger_x > 0.9:
-                        subprocess.Popen(["python", "changing_mods_template.py"])
-                        cap.release()
-                        cv2.destroyAllWindows()
-                        return
-
-            cv2.imshow('Volume Control', frame)
-
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
+        if cv2.waitKey(1) & 0xFF == ord(' '):
+            break
 
     cap.release()
     cv2.destroyAllWindows()
 
-if __name__ == '__main__':
-    change_vol()
+if __name__ == "__main__":
+    print("Move your finger down to decrease the volume and do the opposite to increase the volume.")
+    print("To close this [press space bar] and go to the change_modes_template, move your index finger to the left.")
+    change_volume()
