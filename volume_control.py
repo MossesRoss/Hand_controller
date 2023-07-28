@@ -21,6 +21,7 @@ def change_volume():
     while True:
         success, image = cap.read()
         if not success:
+            print("Issues in Camera")
             break
 
         image = cv2.flip(image, 1)
@@ -49,16 +50,14 @@ def change_volume():
 
                 # Set the volume if it's changed
                 if new_volume != current_volume:
-                    volume.SetMasterVolumeLevelScalar(new_volume, None)
+                    volume.SetMasterVolumeLevelScalar(1 - new_volume, None)
                     current_volume = new_volume
 
-                # Square around the index finger
+                # Square around the index finger & Horizontal line
                 cv2.rectangle(image, (index_finger_x - 10, index_finger_y - 10), (index_finger_x + 10, index_finger_y + 10), (255, 255, 255), 2)
-
-                # Horizontal line where the index finger is
                 cv2.line(image, (0, index_finger_y), (screen_width, index_finger_y), (0, 255, 0), 3)
 
-        cv2.imshow('User Interface', image)
+        cv2.imshow('Set Volume', image)
 
         if cv2.waitKey(1) & 0xFF == ord(' '):
             break
@@ -67,6 +66,5 @@ def change_volume():
     cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-    print("Move your finger down to increase the volume and do the opposite to decrease the volume.")
-    print("To close this and go to the change modes template, move your finger to the left.")
+    print("To close this [Press Space bar] and to go to the change modes template, move your finger to the left.")
     change_volume()
