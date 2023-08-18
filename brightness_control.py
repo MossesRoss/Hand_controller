@@ -1,10 +1,6 @@
 import cv2
 import mediapipe as mp
 import screen_brightness_control as sbc
-import subprocess
-
-print ("Move your finger down to increase the volume and do the opposite to increase the volume")
-print("To close this and go to change modes template, move your finger to the left.")
 
 def change_brightness():
     mp_hands = mp.solutions.hands
@@ -40,12 +36,6 @@ def change_brightness():
                 index_finger_landmark = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP]
                 index_finger_x = int(index_finger_landmark.x * screen_width)
                 index_finger_y = int(index_finger_landmark.y * screen_height)
-
-                if index_finger_x < 100:
-                    subprocess.Popen(['python', 'changing_mods_template.py'])
-                    cap.release()
-                    cv2.destroyAllWindows()
-                    return
 
                 brightness = (index_finger_y / screen_height) * 100
                 sbc.set_brightness(int(brightness))
