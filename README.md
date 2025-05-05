@@ -1,4 +1,4 @@
-# Hand Tracking Python Project
+# Hand Tracking Python Project is not Longer maintained by me, this is here just to be as a memory
 
 ## Description
 This project is a Python-based hand tracking system that utilizes the MediaPipe library and other related libraries. It provides real-time hand tracking and gesture recognition capabilities, allowing you to track and analyze hand movements from various sources such as a webcam or recorded videos.
